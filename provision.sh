@@ -49,8 +49,9 @@ SQL_INSTALL_AGENT='y'
 # SQL_INSTALL_FULLTEXT='y'
 
 # Create an additional user with sysadmin privileges (optional)
-# SQL_INSTALL_USER='<Username>'
-# SQL_INSTALL_USER_PASSWORD='<YourStrong!Passw0rd>'
+echo "Setting up 'ignition' user and password 'ignition'"
+SQL_INSTALL_USER='ignition'
+SQL_INSTALL_USER_PASSWORD='ignition'
 
 if [ -z $MSSQL_SA_PASSWORD ]
 then
@@ -148,16 +149,9 @@ fi
 
 ########## End of MSSQL Installation ########## 
 
-
-# Setup MySQL Setup and install mysql-server
-
-# Modify MySQL Default Configuration to utilize broader bind-to address and reload configuration
-
-# Setup MySQL Username
-
 # Enable Auto Backups
 
-# Redirect MySQL backups to Vagrant share folder
+# Redirect SQL backups to Vagrant share folder
 
 # Download Ignition if the installer is not already present (or if md5sum doesn't match)
 if [ ! -f /vagrant/Ignition-7.9.4-linux-x64-installer.run ] || [ "`md5sum /vagrant/Ignition-7.9.4-linux-x64-installer.run | cut -c 1-32`" != "b60bc5173dd61cf0273a7394006328dd" ]; then
