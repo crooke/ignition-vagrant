@@ -8,31 +8,12 @@ export DEBIAN_FRONTEND=noninteractive
 sudo sed -i 's/^mesg n/tty -s \\&\\& mesg n/g' /root/.profile
 sudo ex +"%s@DPkg@//DPkg" -cwq /etc/apt/apt.conf.d/70debconf
 sudo dpkg-reconfigure debconf -f noninteractive -p critical
-# Setup Apt Cacher NG
-echo "Setting up Package Caching"
-sudo apt-get install -y apt-cacher-ng >> install.log
-echo $'Acquire::http::Proxy \"http://localhost:3142\";' > /etc/apt/apt.conf.d/00aptproxy
-# Apply fix for Oracle Java via the cache - https://askubuntu.com/questions/195297/install-oracle-java7-installer-through-apt-cacher-ng
-sudo sed -i '$ a PfilePattern = .*(\\\\.d?deb|\\\\.rpm|\\\\.drpm|\\\\.dsc|\\\\.tar(\\\\.gz|\\\\.bz2|\\\\.lzma|\\\\.xz)(\\\\.gpg|\\\\?AuthParam=.*)?|\\\\.diff(\\\\.gz|\\\\.bz2|\\\\.lzma|\\\\.xz)|\\\\.jigdo|\\\\.template|changelog|copyright|\\\\.udeb|\\\\.debdelta|\\\\.diff/.*\\\\.gz|(Devel)?ReleaseAnnouncement(\\\\?.*)?|[a-f0-9]+-(susedata|updateinfo|primary|deltainfo).xml.gz|fonts/(final/)?[a-z]+32.exe(\\\\?download.*)?|/dists/.*/installer-[^/]+/[0-9][^/]+/images/.*)$' /etc/apt-cacher-ng/acng.conf
-sudo sed -i '$ a RequestAppendix: Cookie: oraclelicense=a' /etc/apt-cacher-ng/acng.conf
-sudo service apt-cacher-ng stop
-# Restore package cache if available
-if [ -f /vagrant/package-cache.tar ]; then
-  echo "Restoring existing package cache"
-  sudo tar vxf /vagrant/package-cache.tar -C /var/cache/apt-cacher-ng >> install.log
-fi
-echo "Starting Package Caching"
-sudo service apt-cacher-ng start
-# Add Oracle Java Repository
-echo "Adding Oracle Java Repository"
-sudo add-apt-repository -y ppa:webupd8team/java >> install.log 2>&1
-sudo apt-get update >> install.log
-# Setup License Acceptance and install Java8
-echo "Installing Oracle Java8"
-echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
-echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
-sudo apt-get install -y -q oracle-java8-installer >> install.log
 
+echo "Updating packages"
+sudo apt-get -qq update
+
+echo "Installing OpenJDK Java8"
+sudo apt-get -y install openjdk-8-jre >> install.log
 
 ############## SQL SERVER INSTALLATION ##############
 
@@ -168,8 +149,3 @@ echo "Restoring Base Gateway Backup"
 sudo /usr/local/share/ignition/gwcmd.sh -s /vagrant/base-gateway.gwbk -y >> install.log
 echo "Starting Ignition"
 sudo systemctl start ignition.service
-# Preserve Package Caches - Note that simply using a shared folder connection for the apt-cacher-ng service breaks it, so this is the alternative.
-echo "Preserving Package Caches"
-pushd /var/cache/apt-cacher-ng >> install.log
-sudo tar vcf /vagrant/package-cache.tar * >> install.log
-popd >> install.log
