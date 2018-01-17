@@ -33,7 +33,7 @@ SQL_INSTALL_AGENT='y'
 
 # Create an additional user with sysadmin privileges (optional)
 SQL_INSTALL_USER='ignition'
-SQL_INSTALL_USER_PASSWORD='ignition'
+SQL_INSTALL_USER_PASSWORD='Ign!ti0n'
 
 if [ -z $MSSQL_SA_PASSWORD ]
 then
