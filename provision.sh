@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Initialize install log
 rm -f install.log
 # Configure for noninteractive mode (for dpkg)
@@ -32,10 +34,10 @@ echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-se
 sudo apt-get install -y -q oracle-java8-installer >> install.log
 
 
-########## Start of MSSQL Installation ##########
+############## SQL SERVER INSTALLATION ##############
 
 # Password for the SA user (required)
-MSSQL_SA_PASSWORD='D@taba$e'
+MSSQL_SA_PASSWORD='P@ssw0rd'
 
 # Product ID of the version of SQL server you're installing
 # Must be evaluation, developer, express, web, standard, enterprise, or your 25 digit product key
@@ -46,12 +48,11 @@ MSSQL_PID='express'
 SQL_INSTALL_AGENT='y'
 
 # Install SQL Server Full Text Search (optional)
-# SQL_INSTALL_FULLTEXT='y'
+# SQL_INSTALL_FULLTEXT='n'
 
 # Create an additional user with sysadmin privileges (optional)
-echo "Setting up 'ignition' user and password 'ignition'"
-SQL_INSTALL_USER='ignition'
-SQL_INSTALL_USER_PASSWORD='ignition'
+# SQL_INSTALL_USER='<Username>'
+# SQL_INSTALL_USER_PASSWORD='<YourStrong!Passw0rd>'
 
 if [ -z $MSSQL_SA_PASSWORD ]
 then
@@ -74,8 +75,8 @@ sudo apt-get install -y mssql-server
 
 echo Running mssql-conf setup...
 sudo MSSQL_SA_PASSWORD=$MSSQL_SA_PASSWORD \
-     MSSQL_PID=$MSSQL_PID \
-     /opt/mssql/bin/mssql-conf -n setup accept-eula
+	 MSSQL_PID=$MSSQL_PID \
+	 /opt/mssql/bin/mssql-conf -n setup accept-eula
 
 echo Installing mssql-tools and unixODBC developer...
 sudo ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev
@@ -95,8 +96,8 @@ fi
 # Optional SQL Server Full Text Search installation:
 if [ ! -z $SQL_INSTALL_FULLTEXT ]
 then
-    echo Installing SQL Server Full-Text Search...
-    sudo apt-get install -y mssql-server-fts
+	echo Installing SQL Server Full-Text Search...
+	sudo apt-get install -y mssql-server-fts
 fi
 
 # Configure firewall to allow TCP port 1433:
@@ -121,10 +122,10 @@ do
   echo Waiting for SQL Server to start...
   sleep 3s
   /opt/mssql-tools/bin/sqlcmd \
-    -S localhost \
-    -U SA \
-    -P $MSSQL_SA_PASSWORD \
-    -Q "SELECT @@VERSION" 2>/dev/null
+	-S localhost \
+	-U SA \
+	-P $MSSQL_SA_PASSWORD \
+	-Q "SELECT @@VERSION" 2>/dev/null
   errstatus=$?
   ((counter++))
 done
@@ -141,17 +142,16 @@ if [ ! -z $SQL_INSTALL_USER ] && [ ! -z $SQL_INSTALL_USER_PASSWORD ]
 then
   echo Creating user $SQL_INSTALL_USER
   /opt/mssql-tools/bin/sqlcmd \
-    -S localhost \
-    -U SA \
-    -P $MSSQL_SA_PASSWORD \
-    -Q "CREATE LOGIN [$SQL_INSTALL_USER] WITH PASSWORD=N'$SQL_INSTALL_USER_PASSWORD', DEFAULT_DATABASE=[master], CHECK_EXPIRATION=ON, CHECK_POLICY=ON; ALTER SERVER ROLE [sysadmin] ADD MEMBER [$SQL_INSTALL_USER]"
+	-S localhost \
+	-U SA \
+	-P $MSSQL_SA_PASSWORD \
+	-Q "CREATE LOGIN [$SQL_INSTALL_USER] WITH PASSWORD=N'$SQL_INSTALL_USER_PASSWORD', DEFAULT_DATABASE=[master], CHECK_EXPIRATION=ON, CHECK_POLICY=ON; ALTER SERVER ROLE [sysadmin] ADD MEMBER [$SQL_INSTALL_USER]"
 fi
 
-########## End of MSSQL Installation ########## 
+echo Done!
 
-# Enable Auto Backups
+############## END OF SQL SERVER INSTALLATION ##############
 
-# Redirect SQL backups to Vagrant share folder
 
 # Download Ignition if the installer is not already present (or if md5sum doesn't match)
 if [ ! -f /vagrant/Ignition-7.9.4-linux-x64-installer.run ] || [ "`md5sum /vagrant/Ignition-7.9.4-linux-x64-installer.run | cut -c 1-32`" != "b60bc5173dd61cf0273a7394006328dd" ]; then
