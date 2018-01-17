@@ -32,8 +32,8 @@ SQL_INSTALL_AGENT='y'
 # SQL_INSTALL_FULLTEXT='n'
 
 # Create an additional user with sysadmin privileges (optional)
-# SQL_INSTALL_USER='<Username>'
-# SQL_INSTALL_USER_PASSWORD='<YourStrong!Passw0rd>'
+SQL_INSTALL_USER='ignition'
+SQL_INSTALL_USER_PASSWORD='ignition'
 
 if [ -z $MSSQL_SA_PASSWORD ]
 then
@@ -48,11 +48,8 @@ sudo add-apt-repository "${repoargs}"
 repoargs="$(curl -s https://packages.microsoft.com/config/ubuntu/16.04/prod.list)"
 sudo add-apt-repository "${repoargs}"
 
-echo Running apt-get update -y...
-sudo apt-get update -y
-
 echo Installing SQL Server...
-sudo apt-get install -y mssql-server
+sudo apt-get -qq update && apt-get install -y mssql-server >> install.log
 
 echo Running mssql-conf setup...
 sudo MSSQL_SA_PASSWORD=$MSSQL_SA_PASSWORD \
@@ -60,7 +57,7 @@ sudo MSSQL_SA_PASSWORD=$MSSQL_SA_PASSWORD \
 	 /opt/mssql/bin/mssql-conf -n setup accept-eula
 
 echo Installing mssql-tools and unixODBC developer...
-sudo ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev
+sudo ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev >> install.log
 
 # Add SQL Server tools to the path by default:
 echo Adding SQL Server tools to your path...
@@ -71,7 +68,7 @@ echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
 if [ ! -z $SQL_INSTALL_AGENT ]
 then
   echo Installing SQL Server Agent...
-  sudo apt-get install -y mssql-server-agent
+  sudo apt-get install -y mssql-server-agent >> install.log
 fi
 
 # Optional SQL Server Full Text Search installation:
