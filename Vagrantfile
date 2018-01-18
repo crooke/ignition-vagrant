@@ -58,6 +58,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox" do |vb|
     vb.linked_clone = true
     vb.memory = "2048"
+    vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
   end
 
   config.vm.provider "parallels" do |prl, override|
