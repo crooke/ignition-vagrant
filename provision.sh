@@ -118,15 +118,15 @@ fi
 # Optional new user creation:
 if [ ! -z $SQL_INSTALL_USER ] && [ ! -z $SQL_INSTALL_USER_PASSWORD ]
 then
-  echo Creating user $SQL_INSTALL_USER
+  echo Creating user $SQL_INSTALL_USER and database
   /opt/mssql-tools/bin/sqlcmd \
 	-S localhost \
 	-U SA \
 	-P $MSSQL_SA_PASSWORD \
-	-Q "CREATE LOGIN [$SQL_INSTALL_USER] WITH PASSWORD=N'$SQL_INSTALL_USER_PASSWORD', DEFAULT_DATABASE=[master], CHECK_EXPIRATION=ON, CHECK_POLICY=ON; ALTER SERVER ROLE [sysadmin] ADD MEMBER [$SQL_INSTALL_USER]"
+	-Q "CREATE LOGIN [$SQL_INSTALL_USER] WITH PASSWORD=N'$SQL_INSTALL_USER_PASSWORD', DEFAULT_DATABASE=[master], CHECK_EXPIRATION=ON, CHECK_POLICY=ON; ALTER SERVER ROLE [sysadmin] ADD MEMBER [$SQL_INSTALL_USER]; CREATE DATABASE ignition"
 fi
 
-echo Done!
+echo Done installing SQL Server!
 
 ############## END OF SQL SERVER INSTALLATION ##############
 
