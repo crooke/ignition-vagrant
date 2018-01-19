@@ -59,6 +59,9 @@ Vagrant.configure("2") do |config|
     vb.linked_clone = true
     vb.memory = "2048"
     vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
+    # Basebox ubuntu/xenial64 comes with following Vagrantfile config and causes https://github.com/joelhandwell/ubuntu_vagrant_boxes/issues/1
+    # following config will address the issue
+    v.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
   end
 
   config.vm.provider "parallels" do |prl, override|
